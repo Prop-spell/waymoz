@@ -13,11 +13,10 @@
      ================================================================ -->
 <script>
 const CONFIG = {
-  name:      "Waymoz",                       // как контакт сохранится в телефоне
-  phone:     "+7 900 000-00-00",             // номер, в любом формате
-  instagram: "waymoz",                       // ник без @
-  whatsapp:  "+7 900 000-00-00",             // номер для WhatsApp (можно тот же)
-  whatsappText: "Здравствуйте! Хочу заказать мёд",  // текст, который подставится в чат
+  phone:     "+7 900 000-00-00",  // номер, в любом формате. Пусто — кнопки «Телефон» не будет
+  instagram: "",     // ник без @. Пусто — кнопка ведёт просто на instagram.com
+  whatsapp:  "",     // номер для WhatsApp. Пусто — кнопка ведёт просто на whatsapp.com
+  whatsappText: "",  // текст, который подставится в чат (необязательно)
 };
 </script>
 <!-- ================================================================ -->
@@ -232,14 +231,14 @@ const CONFIG = {
       <span class="ic" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3.5h3.2l1.6 4.2-2.1 1.4a11 11 0 0 0 7.2 7.2l1.4-2.1 4.2 1.6V19a1.8 1.8 0 0 1-1.9 1.8C10.4 20.3 3.7 13.6 3.2 5.4A1.8 1.8 0 0 1 5 3.5z"/></svg>
       </span>
-      <span class="t"><b>Телефон</b><small data-phone-text></small></span>
+      <span class="t"><b>Телефон</b><small>Позвонить или скопировать</small></span>
     </button>
 
     <a class="btn" id="btn-ig" target="_blank" rel="noopener">
       <span class="ic" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.8l1.4-2h4.6l1.4 2h1.8A2.5 2.5 0 0 1 20 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17.5z"/><circle cx="12" cy="13" r="3.6"/></svg>
       </span>
-      <span class="t"><b>Instagram</b><small data-ig-text></small></span>
+      <span class="t"><b>Instagram</b><small data-ig-text>Подписаться</small></span>
     </a>
 
     <a class="btn" id="btn-wa" target="_blank" rel="noopener">
@@ -258,10 +257,6 @@ const CONFIG = {
     <a class="sbtn primary" id="sheet-call">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3.5h3.2l1.6 4.2-2.1 1.4a11 11 0 0 0 7.2 7.2l1.4-2.1 4.2 1.6V19a1.8 1.8 0 0 1-1.9 1.8C10.4 20.3 3.7 13.6 3.2 5.4A1.8 1.8 0 0 1 5 3.5z"/></svg>
       Позвонить
-    </a>
-    <a class="sbtn" id="sheet-save">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 19.5c.8-3.4 3.4-5.5 6.5-5.5 1.3 0 2.5.4 3.5 1M18 13v6M15 16h6"/></svg>
-      Сохранить в контакты
     </a>
     <button class="sbtn" id="sheet-copy" type="button">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6.5A2.5 2.5 0 0 0 13.5 4h-7A2.5 2.5 0 0 0 4 6.5v7A2.5 2.5 0 0 0 6.5 16H8"/></svg>
@@ -289,17 +284,6 @@ const CONFIG = {
     $("sheet-num").href = tel;
     $("sheet-call").href = tel;
 
-    const lines = [
-      "BEGIN:VCARD", "VERSION:3.0",
-      "FN:" + C.name, "ORG:" + C.name,
-      "TEL;TYPE=CELL:+" + phoneDigits,
-    ];
-    if (C.instagram) lines.push("URL:https://instagram.com/" + C.instagram.replace(/^@/, ""));
-    if (location.protocol.startsWith("http")) lines.push("URL:" + location.origin + location.pathname);
-    lines.push("END:VCARD");
-    $("sheet-save").href = "data:text/vcard;charset=utf-8," + encodeURIComponent(lines.join("\r\n"));
-    $("sheet-save").download = (C.name || "contact").replace(/[^\wа-яё-]+/gi, "_") + ".vcf";
-
     const sheet = $("sheet");
     $("btn-phone").addEventListener("click", () => sheet.showModal());
     $("sheet-close").addEventListener("click", () => sheet.close());
@@ -321,16 +305,14 @@ const CONFIG = {
 
   // --- Instagram ---
   const ig = (C.instagram || "").replace(/^@/, "").trim();
-  if (!ig) $("btn-ig").remove();
-  else {
-    $("btn-ig").href = "https://instagram.com/" + ig;
-    document.querySelector("[data-ig-text]").textContent = "@" + ig;
-  }
+  $("btn-ig").href = "https://www.instagram.com/" + ig;
+  if (ig) document.querySelector("[data-ig-text]").textContent = "@" + ig;
 
   // --- WhatsApp ---
   const wa = digits(C.whatsapp);
-  if (!wa) $("btn-wa").remove();
-  else $("btn-wa").href = "https://wa.me/" + wa + (C.whatsappText ? "?text=" + encodeURIComponent(C.whatsappText) : "");
+  $("btn-wa").href = wa
+    ? "https://wa.me/" + wa + (C.whatsappText ? "?text=" + encodeURIComponent(C.whatsappText) : "")
+    : "https://www.whatsapp.com/";
 
   let t;
   function toast(msg) {
